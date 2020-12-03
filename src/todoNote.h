@@ -14,6 +14,7 @@
 class TodoNote
 {
 private:
+    bool exists;
     std::string path;
     std::string dirPath;
     std::string fileName;
@@ -29,8 +30,14 @@ private:
 public:
     static bool sortByFileName(TodoNote a, TodoNote b) { return a.fileName < b.fileName; };
 
+    TodoNote()
+    {
+        this->exists = false;
+    }
+
     TodoNote(std::string dirPath, std::string fileName)
     {
+        this->exists = true;
         this->dirPath = dirPath;
         this->fileName = fileName;
         this->path = dirPath + "/" + this->fileName;
@@ -55,21 +62,27 @@ public:
     };
     void moveNote(std::string dirPath)
     {
-        std::rename(this->path.c_str(), (dirPath + "/" + this->fileName).c_str());
-        this->path = this->dirPath;
-        this->title = "[moved] " + this->title;
+        if (this->exists)
+        {
+            std::rename(this->path.c_str(), (dirPath + "/" + this->fileName).c_str());
+            this->path = this->dirPath;
+            this->title = "[moved] " + this->title;
+        }
     }
     void setTitle(std::string value)
     {
-        if (this->title != "[unsaved empty note]")
-            this->content = value + "\nOld Title: " + this->content;
-        else
-            this->content = value;
-        this->title = value;
-        this->saveToFile();
+        if (this->exists)
+        {
+            if (this->title != "[unsaved empty note]")
+                this->content = value + "\nOld Title: " + this->content;
+            else
+                this->content = value;
+            this->title = value;
+            this->saveToFile();
+        }
     }
     std::string getTitle()
     {
-        return this->title;
+        return this->exists ? this->title : "[undefined note]";
     }
 };

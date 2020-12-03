@@ -51,32 +51,33 @@ public:
         refresh(); // Print it on to the real screen
         return getch();
     }
-    std::string awaitInputEnter()
+    std::string awaitInputEnter(std::string inputText = "")
     {
         const int lastLine = getmaxy(this->mainWindow) - 1;
         const int maxLength = getmaxx(this->mainWindow);
-        std::string line;
-        int ch = 127;
+        int ch = 0;
         while (ch != '\n')
         {
             switch (ch)
             {
+            case 0:
+                break;
             case 127: // backspace
-                if (line.length())
-                    line.pop_back();
+                if (inputText.length())
+                    inputText.pop_back();
                 break;
 
             default:
-                line.push_back(ch);
+                inputText.push_back(ch);
                 break;
             }
             mvprintw(lastLine, 1, std::string(maxLength, '_').c_str());
-            mvprintw(lastLine, 1, ("> " + line.substr(line.length()>maxLength-4 ? -1*(maxLength-line.length()-4): 0)).c_str());
+            mvprintw(lastLine, 1, ("> " + inputText.substr(inputText.length() > maxLength - 4 ? -1 * (maxLength - inputText.length() - 4) : 0)).c_str());
             refresh(); // Print it on to the real screen
             ch = getch();
         }
         raw(); // stop waiting for enter
-        return line;
+        return inputText;
     }
     ~NcursesTerminalIO()
     {
