@@ -13,6 +13,8 @@ UserStorage::UserStorage()
     this->tnmDir = constructPathToStorageDir(".tnm");
     this->contextName = ".";
     this->exists = fs::exists(this->tnmDir);
+    if (!this->exists)
+        this->createEmptyStorage();
 }
 
 // TODO handle context of context situation
