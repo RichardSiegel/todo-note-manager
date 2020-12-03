@@ -1,0 +1,61 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "clean up",
+            "type": "shell",
+            "command": "rm",
+            "args": [
+                "-rf",
+                "build",
+            ],
+        },
+        {
+            "label": "create build directory",
+            "type": "shell",
+            "command": "mkdir -p build",
+        },
+        {
+            "label": "compile",
+            "type": "shell",
+            "command": "g++",
+            "args": [
+                "src/*.cpp",
+                "-std=c++17",
+                "-lstdc++fs",
+                "-lncurses",
+                "-o",
+                "build/tnm",
+            ],
+            "dependsOn": [
+                "create build directory",
+            ],
+        },
+        {
+            "label": "compile for debugging",
+            "type": "shell",
+            "command": "g++",
+            "args": [
+                "src/*.cpp",
+                "-std=c++17",
+                "-lstdc++fs",
+                "-lncurses",
+                "-g",
+                "-o",
+                "build/tnm",
+            ],
+            "dependsOn": [
+                "clean up",
+                "create build directory",
+            ],
+        },
+        {
+            "label": "run",
+            "type": "shell",
+            "command": "build/tnm",
+            "dependsOn": [
+                "compile",
+            ],
+        },
+    ]
+}
