@@ -33,7 +33,6 @@ int main(int argc, char *argv[])
         std::vector<TodoNote> notes = storage.getNotes();
         cursesTerm.displayNotes(notes, notesToSkip, selectedIndex);
         keyInput = cursesTerm.awaitKeyPress();
-        selectedNote = selectedIndex > -1 ? notes[selectedIndex + notesToSkip - 1] : TodoNote();
         switch (keyInput)
         {
         case 'q': // close TodoNoteManager
@@ -56,7 +55,14 @@ int main(int argc, char *argv[])
             break;
         default:
             if (keyInput >= '1' && keyInput <= '9') // select item if key was a number
+            {
                 selectedIndex = keyInput - '0';
+                selectedNote = notes[selectedIndex + notesToSkip - 1];
+            }
+            else
+            {
+                selectedNote = TodoNote();
+            }
             // else TODO implement default case
             break;
         }
