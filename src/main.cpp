@@ -11,18 +11,30 @@
  * Author: Richard Siegel
  */
 
+UserStorage storage;
+NcursesTerminalIO cursesTerm;
+
+void displayNotes(std::vector<TodoNote> notes, int skip, int selectedItem)
+{
+    cursesTerm.clearScreen();
+    const int lastAvailable = notes.size() - skip;
+    const int lastVisible = 9;
+    for (int i = 0; i < lastAvailable && i < lastVisible; i++)
+    {
+        bool isSelected = i + 1 == selectedItem;
+        cursesTerm.itemPrint(i + 1, notes[i + skip].getTitle(), isSelected);
+    }
+}
+
 int main(int argc, char *argv[])
 {
-    UserStorage storage;
-
     // TODO implement context change
-    // storage = storage.context("development-notes");
+    // subStorage = storage.context("development-notes");
 
     // TODO output info:
     // std::cout << "Welcome to TodoNoteManager!" << std::endl << std::endl;
     // std::cout << "a hidden directory \"~/.tnm\" has been created to store your notes." << std::endl;
 
-    NcursesTerminalIO cursesTerm;
     int notesToSkip = 0;     // number of itemes, which is 'scrolled' out of view at the top.
     char selectedIndex = -1; // the number used to select an item (-1 means no selection)
     int noteIndex = -1;      // index of the selected note
@@ -33,8 +45,8 @@ int main(int argc, char *argv[])
     {
         std::vector<TodoNote> notes = storage.getNotes();
         noteIndex = selectedIndex + notesToSkip - 1;
-        selectedNote = (noteIndex > -1 && noteIndex < notes.size())? notes[noteIndex] : TodoNote();
-        cursesTerm.displayNotes(notes, notesToSkip, selectedIndex);
+        selectedNote = (noteIndex > -1 && noteIndex < notes.size()) ? notes[noteIndex] : TodoNote();
+        displayNotes(notes, notesToSkip, selectedIndex);
         keyInput = cursesTerm.awaitKeyPress();
         switch (keyInput)
         {

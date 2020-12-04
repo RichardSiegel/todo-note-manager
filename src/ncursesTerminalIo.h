@@ -1,7 +1,6 @@
 #include <ncurses.h>
 #include <string>
 #include <vector>
-#include "todoNote.h"
 
 /* This class handles input and output via the Terminal.
  * it uses ncurses, which is well documented:
@@ -14,14 +13,6 @@ class NcursesTerminalIO
 {
 private:
     WINDOW *mainWindow;
-    void itemPrint(int selectorId, std::string text)
-    {
-        char selector[4];
-        sprintf(selector, "%d: ", selectorId);
-        const int line = (selectorId - 1) * 2;
-        mvprintw(line, 1, selector);
-        mvprintw(line, 4, text.c_str());
-    }
 
 public:
     NcursesTerminalIO()
@@ -29,20 +20,21 @@ public:
         this->mainWindow = initscr();
         raw(); // Line buffering disabled
         //noecho(); // Don't echo() while we do getch
+        keypad(stdscr, TRUE); // Activate pseudo-character tokens outside ASCII range for some KEY-cases
     }
-    void displayNotes(std::vector<TodoNote> notes, int skip, int selectedItem)
+    void itemPrint(int selectorId, std::string text, bool isSelected = false)
+    {
+        char selector[4];
+        sprintf(selector, "%d: ", selectorId);
+        const int line = (selectorId - 1) * 2;
+        attron(isSelected ? (A_STANDOUT | A_BOLD) : A_NORMAL);
+        mvprintw(line, 1, selector);
+        mvprintw(line, 4, text.c_str());
+        attroff(isSelected ? (A_STANDOUT | A_BOLD) : A_NORMAL);
+    }
+    void clearScreen()
     {
         clear();
-        const int lastAvailable = notes.size() - skip;
-        const int lastVisible = 9;
-        for (int i = 0; i < lastAvailable && i < lastVisible; i++)
-        {
-            if (i + 1 == selectedItem)
-                attron(A_STANDOUT | A_BOLD);
-            itemPrint(i + 1, notes[i + skip].getTitle());
-            if (i + 1 == selectedItem)
-                attroff(A_STANDOUT | A_BOLD);
-        }
     }
     char awaitKeyPress()
     {
@@ -54,7 +46,6 @@ public:
     std::string awaitInputEnter(std::string inputText = "")
     {
         int index = inputText.length();
-        keypad(stdscr, TRUE); // Activate pseudo-character tokens outside ASCII range for some KEY-cases
         const int lastLine = getmaxy(this->mainWindow) - 1;
         const int maxLength = getmaxx(this->mainWindow);
         int ch = 0; // null char can be ignored
