@@ -53,27 +53,43 @@ public:
     }
     std::string awaitInputEnter(std::string inputText = "")
     {
+        int index = inputText.length();
+        keypad(stdscr, TRUE); // Activate pseudo-character tokens outside ASCII range for some KEY-cases
         const int lastLine = getmaxy(this->mainWindow) - 1;
         const int maxLength = getmaxx(this->mainWindow);
-        int ch = 0;
+        int ch = 0; // null char can be ignored
         while (ch != '\n')
         {
             switch (ch)
             {
             case 0:
                 break;
-            case 127: // backspace
-                if (inputText.length())
-                    inputText.pop_back();
+            case KEY_BACKSPACE:
+                if (index)
+                    inputText.erase(--index, 1);
                 break;
-
+            case KEY_LEFT:
+                if (index)
+                    --index;
+                break;
+            case KEY_RIGHT:
+                if (index < inputText.length())
+                    ++index;
+                break;
+            case KEY_UP:
+                index = 0;
+                break;
+            case KEY_DOWN:
+                index = inputText.length();
+                break;
             default:
-                inputText.push_back(ch);
+                inputText.insert(index++, std::string(1, ch));
                 break;
             }
             mvprintw(lastLine, 1, std::string(maxLength, '_').c_str());
             mvprintw(lastLine, 1, ("> " + inputText.substr(inputText.length() > maxLength - 4 ? -1 * (maxLength - inputText.length() - 4) : 0)).c_str());
-            refresh(); // Print it on to the real screen
+            mvprintw(lastLine, index + 3, ""); // position curser
+            refresh();                         // Print it on to the real screen
             ch = getch();
         }
         raw(); // stop waiting for enter
