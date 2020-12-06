@@ -14,9 +14,10 @@
 UserStorage storage;
 NcursesTerminalIO cursesTerm;
 
-void displayNotes(std::vector<TodoNote> notes, int skip, int selectedItem)
+void displayInTerminal(std::vector<TodoNote> notes, int skip, int selectedItem)
 {
     cursesTerm.clearScreen();
+    cursesTerm.vectorPrint(storage.getAvailableContexts(), storage.getContextName());
     const int lastAvailable = notes.size() - skip;
     const int lastVisible = 9;
     for (int i = 0; i < lastAvailable && i < lastVisible; i++)
@@ -28,13 +29,11 @@ void displayNotes(std::vector<TodoNote> notes, int skip, int selectedItem)
 
 int main(int argc, char *argv[])
 {
-    // TODO implement context change
-    // subStorage = storage.context("development-notes");
-
     // TODO output info:
     // std::cout << "Welcome to TodoNoteManager!" << std::endl << std::endl;
     // std::cout << "a hidden directory \"~/.tnm\" has been created to store your notes." << std::endl;
 
+    int contextIndex = 0;
     int notesToSkip = 0;     // number of itemes, which is 'scrolled' out of view at the top.
     char selectedIndex = -1; // the number used to select an item (-1 means no selection)
     int noteIndex = -1;      // index of the selected note
@@ -46,7 +45,7 @@ int main(int argc, char *argv[])
         std::vector<TodoNote> notes = storage.getNotes();
         noteIndex = selectedIndex + notesToSkip - 1;
         selectedNote = (noteIndex > -1 && noteIndex < notes.size()) ? notes[noteIndex] : TodoNote();
-        displayNotes(notes, notesToSkip, selectedIndex);
+        displayInTerminal(notes, notesToSkip, selectedIndex);
         keyInput = cursesTerm.awaitKeyPress();
         switch (keyInput)
         {
@@ -62,6 +61,27 @@ int main(int argc, char *argv[])
             break;
         case 'a': // add to title of existing note
             selectedNote.setTitle(cursesTerm.awaitInputEnter(selectedNote.getTitle()));
+            break;
+        case ' ': // view next context
+            contextIndex = ++contextIndex % storage.getAvailableContexts().size();
+            storage = UserStorage(storage.getAvailableContexts()[contextIndex]);
+            selectedIndex = -1;
+            break;
+        case 'c': // create context // TODO consider removing this in favor of 'm'
+            storage = UserStorage(cursesTerm.awaitInputEnter());
+            contextIndex = storage.getIndexWithinAvailableContexts();
+            break;
+        case 'm': // move note into other context OR create context
+            storage = UserStorage(cursesTerm.awaitInputEnter());
+            storage.moveNoteIntoContext(selectedNote);
+            selectedIndex = -1;
+            contextIndex = storage.getIndexWithinAvailableContexts();
+            break;
+        case 'd': // trash all notes in context and delete context
+            storage.trashContext();
+            storage = UserStorage();
+            selectedIndex = -1;
+            contextIndex = storage.getIndexWithinAvailableContexts();
             break;
         case '0': // show more notes
             if (storage.countNotes() == ++notesToSkip)

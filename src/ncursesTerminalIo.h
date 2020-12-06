@@ -26,11 +26,22 @@ public:
     {
         char selector[4];
         sprintf(selector, "%d: ", selectorId);
-        const int line = (selectorId - 1) * 2;
+        const int line = (selectorId)*2;
         attron(isSelected ? (A_STANDOUT | A_BOLD) : A_NORMAL);
         mvprintw(line, 1, selector);
         mvprintw(line, 4, text.c_str());
         attroff(isSelected ? (A_STANDOUT | A_BOLD) : A_NORMAL);
+    }
+    void vectorPrint(std::vector<std::string> stringVector, std::string highlightedField)
+    {
+        mvprintw(0, 1, "");
+        for (auto stringValue : stringVector)
+        {
+            const bool isSelected = stringValue == highlightedField;
+            attron(isSelected ? (A_STANDOUT | A_BOLD) : A_NORMAL);
+            printw((' ' + stringValue + ' ').c_str());
+            attroff(isSelected ? (A_STANDOUT | A_BOLD) : A_NORMAL);
+        }
     }
     void clearScreen()
     {

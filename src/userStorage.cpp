@@ -6,30 +6,31 @@
 #include <set>
 #include <pwd.h>
 #include <experimental/filesystem>
+#include <algorithm>
 namespace fs = std::experimental::filesystem;
 
-UserStorage::UserStorage()
+UserStorage::UserStorage(std::string contextName)
 {
+    this->contextName = contextName;
     this->tnmDir = constructPathToStorageDir(".tnm");
-    this->contextName = ".";
-    this->exists = fs::exists(this->tnmDir);
+    this->exists = fs::exists(this->getContextDir()) && fs::exists(this->getContextTrashDir());
     if (!this->exists)
         this->createEmptyStorage();
 }
 
-// TODO handle context of context situation
-UserStorage UserStorage::context(std::string contextName)
+std::string UserStorage::getContextName()
 {
-    UserStorage subContextStorage = *this;
-    subContextStorage.contextName = contextName;
-    if (!subContextStorage.exists)
-        subContextStorage.createEmptyStorage();
-    return subContextStorage;
+    return this->contextName;
+}
+
+std::string UserStorage::getDirWithContexts()
+{
+    return this->tnmDir + "/notes/";
 }
 
 std::string UserStorage::getContextDir()
 {
-    return this->tnmDir + "/notes/" + this->contextName;
+    return this->getDirWithContexts() + this->contextName;
 }
 
 std::string UserStorage::getContextTrashDir()
@@ -92,4 +93,45 @@ std::string UserStorage::currentSortableDateTime()
 void UserStorage::trashNote(TodoNote note)
 {
     note.moveNote(this->getContextTrashDir());
+}
+
+void UserStorage::moveNoteIntoContext(TodoNote note)
+{
+    note.moveNote(this->getContextDir());
+}
+
+std::vector<std::string> UserStorage::getAvailableContexts()
+{
+    std::set<std::string> sortedContexts;
+    sortedContexts.insert(".");
+    for (fs::path path : fs::directory_iterator(this->getDirWithContexts()))
+    {
+        if (fs::is_directory(path))
+            sortedContexts.insert(path.filename());
+    }
+    std::vector<std::string> contexts(sortedContexts.begin(), sortedContexts.end());
+    return contexts;
+}
+
+template<typename T>
+int findVectorIndex(std::vector<T> v, T item) {
+    auto itr = std::find(v.begin(), v.end(), item);
+    if (itr == v.cend())
+        throw "Element not found in Vector";
+    return std::distance(v.begin(), itr);
+}
+
+int UserStorage::getIndexWithinAvailableContexts()
+{
+    return findVectorIndex<std::string>(this->getAvailableContexts(), this->getContextName()); 
+}
+
+void UserStorage::trashContext()
+{
+    for (auto note : this->getNotes())
+    {
+        this->trashNote(note);
+    }
+    fs::remove(this->getContextDir());
+    this->exists = false;
 }

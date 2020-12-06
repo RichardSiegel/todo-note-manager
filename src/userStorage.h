@@ -20,6 +20,7 @@ private:
     std::string tnmDir;
     std::string constructPathToStorageDir(std::string dirName);
     std::string contextName;
+    std::string getDirWithContexts();
     std::string getContextDir();
     std::string getContextTrashDir();
     void createEmptyStorage(); 
@@ -27,10 +28,14 @@ private:
 
 public:
     bool exists;
-    UserStorage();
-    UserStorage context(std::string contextName);
+    UserStorage(std::string contextName = ".");
+    std::string getContextName();
     std::vector<TodoNote> getNotes();
     int countNotes();
     TodoNote createNote(std::string title);
     void trashNote(TodoNote note);
+    void moveNoteIntoContext(TodoNote note);
+    std::vector<std::string> getAvailableContexts();
+    int getIndexWithinAvailableContexts();
+    void trashContext(); // current context is trashed and removed if not main/the fallback
 };
