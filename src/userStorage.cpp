@@ -7,6 +7,7 @@
 #include <pwd.h>
 #include <experimental/filesystem>
 #include <algorithm>
+#include <stdlib.h>     /* srand, rand */
 namespace fs = std::experimental::filesystem;
 
 UserStorage::UserStorage(std::string contextName)
@@ -70,7 +71,8 @@ int UserStorage::countNotes()
 
 TodoNote UserStorage::createNote(std::string title)
 {
-    TodoNote note = TodoNote(this->getContextDir(), this->currentSortableDateTime() + "_" + title);
+    std::string randId = std::to_string(rand() % 999 + 100); 
+    TodoNote note = TodoNote(this->getContextDir(), this->currentSortableDateTime() + "_" + randId);
     note.setTitle(title);
     return note;
 }
