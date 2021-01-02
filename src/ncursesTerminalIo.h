@@ -1,6 +1,7 @@
 #include <ncurses.h>
 #include <string>
 #include <vector>
+#include <regex>
 
 /* This class handles input and output via the Terminal.
  * it uses ncurses, which is well documented:
@@ -29,7 +30,9 @@ public:
         const int line = (selectorId)*2;
         attron(isSelected ? (A_STANDOUT | A_BOLD) : A_NORMAL);
         mvprintw(line, 1, selector);
-        mvprintw(line, 4, text.c_str());
+
+        std::regex e("%"); // escape special printf char
+        mvprintw(line, 4, std::regex_replace(text,e,"%%").c_str());
         attroff(isSelected ? (A_STANDOUT | A_BOLD) : A_NORMAL);
     }
     void vectorPrint(std::vector<std::string> stringVector, std::string highlightedField)

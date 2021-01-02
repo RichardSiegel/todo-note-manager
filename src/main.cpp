@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <stdlib.h>
 #include "userStorage.h"
 #include "todoNote.h"
 #include "ncursesTerminalIo.h"
@@ -51,6 +52,16 @@ int main(int argc, char *argv[])
         {
         case 'q': // close TodoNoteManager
             runningMainLoop = false;
+            break;
+        case 'e': // edit selected note
+            system(("vim '" + selectedNote.getFilePath() + "'").c_str());
+            break;
+        case 'r': // run selected notes title in terminal
+            system("reset"); // end special new line formating of NcursesTerminalIO
+            system("clear");
+            system(selectedNote.getTitle().c_str());
+            cursesTerm.awaitKeyPress();
+            cursesTerm = NcursesTerminalIO(); // restoring special new line formating of NcursesTerminalIO
             break;
         case 'x': // delete selected note
             storage.trashNote(selectedNote);

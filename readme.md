@@ -12,9 +12,10 @@ the interface and input commands have been inspired by VIM
 * Create context group by pressing `[c]` or `[m]` when no note is selected
 * Move a note from one context group to another by pressing `[m]` and entering the new context group name
 * press `[space]` to toggle context group names
+* press `[e]` to edit selected note in vim (first line of document is the title listed in tnm)
+* press `[r]` run selected notes title in terminal
 
 ## Planned Features
-* open note in editor (first line of document is the title listed in tnm)
 * undo delete (nots are currently not deleted but trashed, however the process can only be undone within the file system and not the program)
 * scheduling of todos and notes to appear or be trashed in the future
 * and more ...

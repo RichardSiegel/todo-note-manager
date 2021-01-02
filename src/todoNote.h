@@ -85,4 +85,8 @@ public:
     {
         return this->exists ? this->title : "[undefined note]";
     }
+    std::string getFilePath()
+    {
+        return this->path;
+    }
 };
